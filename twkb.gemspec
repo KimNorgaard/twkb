@@ -5,13 +5,11 @@ require "twkb/version"
 Gem::Specification.new do |s|
   s.name        = 'twkb'
   s.version     = TWKB::VERSION
-  s.date        = '2013-05-01'
-  s.summary     = "TaskWarrior Kanban"
-  s.description = "A command line utility based on task warrior to create kanban boards."
   s.authors     = ["Kim Nørgaard"]
   s.email       = 'jasen@jasen.dk'
-  s.files       = ["lib/twkb.rb"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/KimNorgaard/twkb"
+  s.summary     = "TaskWarrior Kanban"
+  s.description = "A command line utility based on task warrior to create kanban boards."
 
   s.add_runtime_dependency 'terminal-table', '~>1.4.5'
   s.add_runtime_dependency 'parseconfig', '~>1.0.2'
