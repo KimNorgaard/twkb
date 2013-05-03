@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'twkb'
+
+twkb = TWKB::App.new( :board_name => ARGV.first )
+twkb.print_table
