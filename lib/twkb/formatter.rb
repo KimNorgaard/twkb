@@ -9,12 +9,13 @@ module TWKB
       @cell_width   = options[:cell_width]
       @cell_width ||= 15
       @stages = options[:stages]
+      @title  = options[:title]
       prepare
     end
 
     def table
       stage_labels = @stages.keys.map{|k,v| @stages[k][:label]}
-      Terminal::Table.new :headings => stage_labels, :rows => [@lanes]
+      Terminal::Table.new :title => @title, :headings => stage_labels, :rows => [@lanes]
     end
 
     private

@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'terminal-table', '~>1.4.5'
   s.add_runtime_dependency 'parseconfig', '~>1.0.2'
   s.add_runtime_dependency 'rainbow', '~>1.1.4'
+  s.add_runtime_dependency 'gli', '~>2.5.6'
 
   s.files         = `git ls-files`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }

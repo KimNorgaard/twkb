@@ -36,7 +36,21 @@ uda.stage.values=backlog,next,inprogress,waiting
 A 'done' stage is automatically added, including the five most recent completed tasks.
 
 ### Displaying the board
-Simply run `twkb` to display the default board (which is "personal"). You can specify an alternative board name as the first argument: `twkb work`.
+Simply run `twkb` to display the default board (which is "personal").
+
+You can specify alternative boards using 'twkb show -b <board_name>'. If you want to make this easier, it might be a good idea to create an alias like this one:
+
+An alternative is to make a shell alias, like this one (using bash):
+
+```bash
+alias kb='twkb show -b $1'
+```
+
+This way you can run:
+
+```bash
+kb work
+```
 
 That should get you started using twkb.
 

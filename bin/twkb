@@ -1,6 +1,110 @@
 #!/usr/bin/env ruby
 
+require 'rubygems'
+require 'open3'
+require 'gli'
 require 'twkb'
 
-twkb = TWKB::App.new( :board_name => ARGV.first )
-twkb.print_table
+include GLI::App
+
+# Cross-platform way of finding an executable in the $PATH.
+#
+#   which('ruby') #=> /usr/bin/ruby
+# source: http://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
+def which(cmd)
+  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+    exts.each { |ext|
+      exe = File.join(path, "#{cmd}#{ext}")
+      return exe if File.executable? exe
+    }
+  end
+  return nil
+end
+
+program_desc 'Kanban boards for TaskWarrior'
+
+exit_now!("The taskwarrior binary 'task' was not found in PATH.") unless which('task')
+
+default_command :show
+
+desc "Add task"
+long_desc "Add a task to a given board and stage."
+arg_name 'task_description'
+command :add do |c|
+  c.desc 'Board to use'
+  c.flag [:b, :board], :default_value => 'personal'
+
+  c.desc 'Stage to use'
+  c.flag [:s, :stage], :default_value=> 'backlog'
+
+  c.action do |global_options, options, args|
+    help_now!('Task description is required') if args.empty?
+    o, e, s = Open3.capture3("task add board:#{options[:board]} stage:#{options[:stage]} #{args.join(' ')}")
+  end
+end
+
+desc 'Move task to stage'
+long_desc <<EOF
+Move a task to a stage. If no stage is set, the task will be moved to the
+next one as defined in uda.stage.values. If the current stage is the last one
+the task will be set to completed.
+EOF
+command :move do |c|
+  c.desc 'ID of task'
+  c.flag [:i, :id]
+
+  c.desc 'Stage to move task to'
+  c.flag [:s, :stage]
+
+  c.action do |global_options, options, args|
+    help_now!('-i <ID> is required') unless options[:id]
+    help_now!('-i <ID> is required') if options[:id].empty?
+
+    o, e, s = Open3.capture3("task #{options[:id]} info")
+    exit_now!("There was an error getting info stage ID #{options[:id]}.") unless s.success?
+
+    if options[:stage]
+      puts "Task ID #{options[:id]} - setting stage to \"#{options[:stage]}\"."
+      o, e, s = Open3.capture3("task #{options[:id]} modify stage:#{options[:stage]}")
+      exit_now!(nil, 0)
+    end
+
+    stage_line = o.split("\n").grep(/^Stage/)
+    exit_now!("Task ID #{options[:id]} has no stage set. Aborting.") unless stage_line.count > 0
+    current_stage = stage_line.first.split(" ").pop
+
+    taskrc_file = File.join(Dir.home, ".taskrc")
+    exit_now!('Could not read ~/.taskrc. Aborting.') unless File.readable? taskrc_file
+    taskrc = File.open(taskrc_file).readlines
+    stages_line = taskrc.grep(/^uda.stage.values=/)
+    exit_now!('Could not find uda.stage.values in ~/.taskrc. Aborting.') unless stages_line.count > 0
+    stages = stages_line.first.split("=").pop.split(",")
+
+    current_stage.chomp!
+    last_stage = stages.last
+    last_stage.chomp!
+    if current_stage == stages.last
+      puts "Already at last stage. Completing task..."
+      o, e, s = Open3.capture3("task #{options[:id]} done")
+    else
+      next_stage = stages[stages.index(current_stage)+1]
+      puts "Task ID #{options[:id]} - Setting stage to #{next_stage}..."
+      o, e, s = Open3.capture3("task #{options[:id]} modify stage:#{next_stage}")
+    end
+  end
+end
+
+desc "Show board"
+long_desc "Show all tasks belonging to a given (or the default) kankab board."
+command :show do |c|
+  c.desc 'Board to use'
+  c.flag [:b, :board]
+
+  c.action do |global_options, options, args|
+    twkb = TWKB::App.new( :board_name => options[:board] )
+    twkb.print_table
+  end
+end
+
+exit run(ARGV)

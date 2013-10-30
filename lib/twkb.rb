@@ -14,7 +14,7 @@ module TWKB
     end
 
     def print_table
-      formatter = TWKB::Formatter.new(:stages => @config.stages, :cell_width => @config['view.cell_width'])
+      formatter = TWKB::Formatter.new(:title => @board_name, :stages => @config.stages, :cell_width => @config['view.cell_width'])
       puts formatter.table
     end
 
