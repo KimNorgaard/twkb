@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/KimNorgaard/twkb"
   s.summary     = "TaskWarrior Kanban"
   s.description = "A command line utility based on task warrior to create kanban boards."
+  s.licenses    = 'MIT'
 
   s.add_runtime_dependency 'terminal-table', '~>1.4.5'
   s.add_runtime_dependency 'parseconfig', '~>1.0.2'
